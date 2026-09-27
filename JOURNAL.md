@@ -137,3 +137,26 @@ agent_loop_tutorial.ipynb` cell-18)의 `process.communicate()`에 timeout
 cyber(`scripts/arvo/arvo.env.example`, `KUBECONFIG` "pod-create permission")
 둘 다 K8s 필요. 최소 3/5 도메인이 단일세션(Colab/RunPod) 구조적으로 불가 —
 이 리포는 지금 착수 대상 아님, vault [[xiaomi-mimo-verl-oss-2026-09-26]] 참고.
+
+## 2026-09-27 control arm 100-step 완주 성공 + 자동판정 정규식 실패(값이 np.float64() 래핑)
+
+**실행 결과**: exit 0, step 100 완주(commit 869b9fc, Colab auto-save). strict
+val(`val-core/openai/gsm8k/acc/mean@1`) 궤적: step0=0.00076, 10=0.057,
+20=0.320, 30=0.448, 40=0.453, 50=0.473, 60=0.478, 70=0.470, 80=0.491,
+90=0.479, 100=0.480. **판정: 학습 진행 확실** — step0 대비 압도적 상승 후
+step40 근처부터 0.45~0.49 사이 plateau, 80→90 소폭 하락(0.491→0.479)은
+배치 노이즈 수준. GSM8K STATE 목표(verl agent_loop 인프라 실전 경험)
+달성.
+
+**자동판정 스크립트 버그(내가 짠 코드)**: 노트북 셀11의 정규식
+`val-core/openai/gsm8k/(?:acc|reward)/mean@\d+:([0-9.]+)`이 0개 매칭.
+원인: 실제 로그값이 `val-core/openai/gsm8k/acc/mean@1:np.float64(0.000758...)`
+형태로 `np.float64(...)` 래퍼가 씌워져 있는데, 정규식은 숫자가 바로 붙는다고
+가정. metric key 이름(`val-core/openai/gsm8k/acc/mean@N`) 자체는 소스
+검증대로 정확했음 — 값 포맷(numpy repr)만 미확인 상태로 코드 작성한 게
+문제. **교훈**: 로그 포맷 관련 정규식은 "필드 이름이 소스에서 확인됨"과
+"그 필드의 값이 어떻게 직렬화되는지"를 별개로 검증해야 함, 후자는
+`print()`/`repr()` 체인 전체(logger → concat_dict_to_str → numpy scalar
+repr)를 다 봐야 알 수 있어 실제 실행 로그 없이는 코드만으로 확정 불가.
+다음 세션에서 노트북 정규식에 `np\.float64\(([0-9.]+)\)` 패턴 추가
+필요(아직 미수정).
