@@ -44,7 +44,7 @@ timeout에 걸렸을 때, 재확인 결과 `/content/verl`도 `/tmp/gpu_setup.sh
 먼저 끝내고 ② 진짜 오래 걸리는 것만 `nohup ... & disown`으로 별도 백그라운드
 launch ③ 같은 exec 안에서 `ps aux`+로그 tail로 launch 성공 직접 확인.
 
-**일반화된 CLI 도구 함정**은 [[Colab_Ops-MOC]]로 이관(로컬 timeout/background
+**일반화된 CLI 도구 함정**은 [[Cloud_GPU_Ops-MOC]]로 이관(로컬 timeout/background
 오판, drivemount stdin 문제 등) — 이 프로젝트엔 이 사례만 남김.
 
 ## 2026-09-27 Drive 마운트 시도 실패, checkpoint 저장은 우회
@@ -52,7 +52,7 @@ launch ③ 같은 exec 안에서 `ps aux`+로그 tail로 launch 성공 직접 �
 장기 보관(checkpoint 등)용으로 `colab drivemount -s agentic-rl-gpu` 시도 →
 브라우저 OAuth 동의 필요 URL 발급, 사용자가 동의했으나 CLI 쪽은 `Press Enter after
 you have granted access...`에서 stdin 대기 중 background 전환되어 확인을 못 받음
-→ 마운트 최종 실패, `/content/drive` 미생성. 상세 원인·해법은 [[Colab_Ops-MOC]]
+→ 마운트 최종 실패, `/content/drive` 미생성. 상세 원인·해법은 [[Cloud_GPU_Ops-MOC]]
 (§drive.mount 헤드리스 무한대기)로 이관.
 
 **이 트랙에서의 결론**: `SAVE_FREQ=-1`(체크포인트 미저장)로 첫 실행 진행, 결과는
